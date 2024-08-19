@@ -95,7 +95,7 @@ $filePath = "C:\path\to\file.txt"; $serverUrl = "http://<FlexiGate-IP>:<PORT>/up
    **Command-line (`curl`):**
 
    ```bash
-   curl http://192.168.1.87:4444/download/folder1/file3.txt -o file3.txt
+   curl http://<FlexiGate-IP>:<PORT>/download/folder1/file3.txt -o file3.txt
    ```
 
    **Browser:**
