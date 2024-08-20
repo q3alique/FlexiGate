@@ -27,7 +27,7 @@ FlexiGate is ideal for lightweight file sharing, especially during pentesting as
     Run the following command to install the dependencies:
 
     ```bash
-    pip install flask colorama termcolor
+    pip install -r requirements.txt
     ```
 
 3. **Run the application:**

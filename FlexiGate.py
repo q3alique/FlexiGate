@@ -121,6 +121,11 @@ if __name__ == '__main__':
         except FileNotFoundError:
             return jsonify({"message": "File not found"}), 404
 
+
+    @app.route('/robotx.txt', methods=['GET'])
+    def robots():
+        return "User-agent: *\nDisallow: /"
+
     # Get the non-loopback IP address
     ip_address = get_non_loopback_ip()
 
