@@ -2,9 +2,9 @@
 
 ## What is FlexiGate?
 
-**FlexiGate** is a versatile file server and uploader built using Flask. It provides a simple way to upload files to a server and access them via a browser or command-line tool like `curl`. The application can serve files with a classic directory listing when accessed via a browser and provides JSON output for programmatic access.
+**FlexiGate** is a versatile file server and uploader built using Flask. It provides a simple way to upload, download, and manage files via a browser or command-line tools like `curl`. The application supports classic directory listing when accessed via a browser and provides JSON output for programmatic access.
 
-FlexiGate is ideal for lightweight file sharing, especially during pentesting assessments where quick and flexible file transfer capabilities are essential.
+FlexiGate is ideal for lightweight file sharing, especially during pentesting assessments where quick and flexible file transfer and file management capabilities are essential.
 
 ## Installation
 
@@ -55,6 +55,27 @@ FlexiGate is ideal for lightweight file sharing, especially during pentesting as
 ### 4. **Download Files**
    - Files can be downloaded directly from the server using either the browser or `curl`.
    - Supports downloading files from nested directories.
+   - Files can now be downloaded directly by accessing their full path from the server URL.
+
+### 5. **Command-Line Interface (CLI)**
+   - FlexiGate includes an interactive CLI to manage files and directories without leaving the application. The CLI supports the following commands:
+     - **ls / dir**: List files in the current directory.
+     - **tree**: Display the directory structure.
+     - **cp**: Copy a file from one location to another.
+     - **mv**: Move or rename a file.
+     - **rm**: Remove a file.
+     - **cd**: Change directories.
+     - **cd ..**: Navigate up one directory level.
+     - **show**: Display upload, download, and file listing commands.
+     - **show file**: Display download commands for a specific file. 
+     - **interfaces**: Display the current listening interfaces of the server.
+     - **exit**: Quit the CLI.
+
+### 6. **Display Listening Interfaces**
+   - The interfaces command allows you to display all the network interfaces the server is listening on, including both loopback and external IPs.
+
+### 7. **HTTP Status Codes**
+   - FlexiGate displays HTTP status codes (e.g., 200, 404) for each request made to the server, providing better visibility into the status of file transfers.
 
 ## Usage Examples
 
@@ -84,7 +105,7 @@ $filePath = "C:\path\to\file.txt"; $serverUrl = "http://<FlexiGate-IP>:<PORT>/up
 
    Navigate to:
 
-   ```
+   ```bash
    http://<FlexiGate-IP>:<PORT>/files
    ```
 
@@ -95,7 +116,7 @@ $filePath = "C:\path\to\file.txt"; $serverUrl = "http://<FlexiGate-IP>:<PORT>/up
    **Command-line (`curl`):**
 
    ```bash
-   curl http://<FlexiGate-IP>:<PORT>/download/folder1/file3.txt -o file3.txt
+   curl http://<FlexiGate-IP>:<PORT>/<path-to-file>/file.txt -o file.txt
    ```
 
    **Browser:**
@@ -117,11 +138,5 @@ You can customize the server by providing additional arguments:
 - **Default path:**
 
   By default, files are stored in the directory where the script is run.
-
-### License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-### Author
 
 FlexiGate was created by **q3alique**. Contributions and suggestions are welcome!
