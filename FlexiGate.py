@@ -22,8 +22,8 @@ def print_logo():
 /_____/   U
 """
     print(Fore.YELLOW + Style.BRIGHT + logo)
-    print(Fore.CYAN + Style.BRIGHT + "FlexiGate 1.1 by q3alique")
-    print(Fore.CYAN + "Release Date: September 20, 2024")
+    print(Fore.CYAN + Style.BRIGHT + "FlexiGate 1.0 by q3alique")
+    print(Fore.CYAN + "Release Date: August 19, 2024")
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -125,8 +125,10 @@ def show_commands(ip_address, port, file_name=None, current_directory=None):
             print(colored(f"\nCommands to download the file '{file_name}':\n", 'cyan', attrs=['bold']))
             print(colored("### Linux Command to Download:", 'yellow', attrs=['bold']))
             print(colored(f'curl http://{ip_address}:{port}/{full_path} -o {file_name}\n', 'white'))
+            print(colored("### Certutil Command to Download:", 'yellow', attrs=['bold']))
+            print(colored(f'certutil -urlcache -split -f "http://{ip_address}:{port}/{full_path}" "C:\\users\\public\\downloads\\{file_name}"\n', 'white'))
             print(colored("### PowerShell Command to Download:", 'yellow', attrs=['bold']))
-            print(colored(f'$fileUrl = "http://{ip_address}:{port}/{full_path}"; Invoke-WebRequest -Uri $fileUrl -OutFile "C:\\path\\{file_name}"\n', 'white'))
+            print(colored(f'$fileUrl = "http://{ip_address}:{port}/{full_path}"; Invoke-WebRequest -Uri $fileUrl -OutFile "C:\\users\\public\\downloads\\{file_name}"\n', 'white'))
         else:
             print(colored(f"File '{file_name}' does not exist in the current directory.\n", 'red'))
     else:
