@@ -23,8 +23,8 @@ def print_logo():
 /_____/   U
 """
     print(Fore.YELLOW + Style.BRIGHT + logo)
-    print(Fore.CYAN + Style.BRIGHT + "FlexiGate 1.0 by q3alique")
-    print(Fore.CYAN + "Release Date: August 19, 2024")
+    print(Fore.CYAN + Style.BRIGHT + "FlexiGate 1.1 by q3alique")
+    print(Fore.CYAN + "Release Date: November 10, 2024")
 
 # Initialize Flask app
 app = Flask(__name__)
