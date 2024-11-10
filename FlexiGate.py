@@ -9,6 +9,7 @@ from termcolor import colored
 from colorama import Fore, Style, init
 import sys
 import logging
+import readline
 
 # Initialize colorama
 init(autoreset=True)
@@ -106,14 +107,18 @@ def get_all_ip_addresses():
                 interfaces[interface_name] = addr.address
     return interfaces
 
-# Function to prioritize tun0 if it exists or return the first non-loopback IP
+# Function to prioritize VPN interfaces if available, else choose first non-loopback IP
 def get_priority_ip(interfaces):
-    if 'tun0' in interfaces:
-        return interfaces['tun0']
+    if 'tun0' in interfaces:  # Typical VPN interface
+        return 'tun0', interfaces['tun0']
     for interface, ip in interfaces.items():
-        if ip != '127.0.0.1':
-            return ip
-    return '127.0.0.1'  # Fallback to localhost
+        if ip != '127.0.0.1':  # Ignore loopback
+            return interface, ip
+    return 'lo', '127.0.0.1'  # Fallback to loopback
+
+# Initially set the default interface and IP based on priority
+all_interfaces = get_all_ip_addresses()
+selected_interface, selected_ip = get_priority_ip(all_interfaces)
 
 # Function to show commands for sending and downloading files
 def show_commands(ip_address, port, file_name=None, current_directory=None):
@@ -148,9 +153,65 @@ def show_interfaces(interfaces, port):
     for interface, ip in interfaces.items():
         print(colored(f"Interface {interface}: http://{ip}:{port}\n", 'green', attrs=['bold']))
 
-# Function to handle command-line interaction
+# List of available commands for auto-completion
+COMMANDS = ["ls", "dir", "tree", "cp", "mv", "rm", "cd", "show", "interfaces", "interface", "exit", "help"]
+
+# Current working directory for the CLI, updated with 'cd' commands
+current_directory = os.getcwd()
+
+# Function to complete commands and file paths
+def completer(text, state):
+    buffer = readline.get_line_buffer().split()
+    options = []
+    
+    # If only the command is typed, complete commands
+    if len(buffer) == 1:
+        options = [cmd for cmd in COMMANDS if cmd.startswith(text)]
+    
+    # For commands that should autocomplete file paths, including 'show'
+    elif buffer[0] in ["ls", "cd", "cp", "mv", "rm", "show"]:
+        # Use text as partial path and list matching directories/files
+        partial_path = buffer[-1] or '.'
+        directory, partial_name = os.path.split(partial_path)
+        
+        # Resolve relative paths using current_directory
+        search_directory = os.path.join(current_directory, directory) if directory else current_directory
+        
+        try:
+            # List entries in the specified directory, avoiding redundant './'
+            entries = os.listdir(search_directory)
+            options = [
+                os.path.join(directory, entry) if directory else entry
+                for entry in entries if entry.startswith(partial_name)
+            ]
+        except FileNotFoundError:
+            options = []
+
+    # Return the matching option at the given index
+    return options[state] if state < len(options) else None
+
+# Configure readline for tab completion with our completer function
+readline.set_completer(completer)
+readline.parse_and_bind("tab: complete")
+
+def list_files_visual(directory):
+    items = os.listdir(directory)
+    visual_output = []
+    for item in sorted(items):
+        item_path = os.path.join(directory, item)
+        if os.path.isdir(item_path):
+            # Show folders in bold blue
+            visual_output.append(colored(item, "blue", attrs=["bold"]))
+        else:
+            # Show files in normal white
+            visual_output.append(colored(item, "white"))
+    return visual_output
+
+# CLI function that uses auto-completion
 def cli_thread(upload_folder, ip_address, port, interfaces):
+    global current_directory, selected_interface, selected_ip
     current_directory = upload_folder
+
     while True:
         try:
             user_input = input(colored(f"FlexiGate [{current_directory}]> ", 'yellow')).strip()
@@ -170,14 +231,34 @@ def cli_thread(upload_folder, ip_address, port, interfaces):
                 print("show - Display the upload, download, and list commands")
                 print("show <file> - Show download command for the specified file")
                 print("interfaces - Show the current listening interfaces")
+                print("interface <interface-name> - Set the specified interface for FlexiGate")
                 print("exit - Exit the CLI\n")
+            elif user_input.lower() == "ls":
+                visual_files = list_files_visual(current_directory)
+                for item in visual_files:
+                    print(item)
             elif user_input.lower().startswith("show"):
                 parts = user_input.split(maxsplit=1)
                 if len(parts) == 2:
                     file_name = parts[1].strip()
-                    show_commands(ip_address, port, file_name, current_directory)
+                    show_commands(selected_ip, port, file_name, current_directory)
                 else:
-                    show_commands(ip_address, port)
+                    show_commands(selected_ip, port)
+            elif user_input.lower() == "interfaces":
+                print(colored("Available network interfaces:", 'green'))
+                for interface, ip in all_interfaces.items():
+                    print(colored(f"{interface}: {ip}", 'cyan'))
+                print(colored(f"\nCurrent active interface: {selected_interface} ({selected_ip})", 'green'))
+            elif user_input.lower().startswith("interface "):
+                parts = user_input.split(maxsplit=1)
+                if len(parts) == 2:
+                    interface_name = parts[1].strip()
+                    if interface_name in all_interfaces:
+                        selected_interface = interface_name
+                        selected_ip = all_interfaces[interface_name]
+                        print(colored(f"Interface changed to {selected_interface} with IP {selected_ip}", 'green'))
+                    else:
+                        print(colored(f"Error: Interface {interface_name} not found", 'red'))
             elif user_input.lower() == "cd ..":
                 new_directory = os.path.dirname(current_directory)
                 if new_directory:
@@ -193,8 +274,6 @@ def cli_thread(upload_folder, ip_address, port, interfaces):
                     print(colored(f"Changed directory to {current_directory}", 'green'))
                 else:
                     print(colored(f"Directory {new_directory} not found.", 'red'))
-            elif user_input.lower() == "interfaces":
-                show_interfaces(interfaces, port)
             elif user_input.lower().startswith("cp ") or user_input.lower().startswith("mv ") or user_input.lower().startswith("rm "):
                 try:
                     command_parts = user_input.split()
