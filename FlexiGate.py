@@ -127,7 +127,7 @@ def show_commands(ip_address, port, file_name=None, current_directory=None):
         if os.path.exists(file_path) and os.path.isfile(file_path):
             # File exists: show download commands
             full_path = os.path.relpath(file_path, app.config['UPLOAD_FOLDER'])
-            print(colored(f"\nCommands to download the file '{file_name}':\n", 'cyan', attrs=['bold']))
+            print(colored(f"\nCommands to download the file '{file_name}' served in {ip_address}:\n", 'cyan', attrs=['bold']))
             
             # Common Commands
             print(colored("### Common Commands:", 'yellow', attrs=['bold']))
@@ -169,7 +169,7 @@ def show_commands(ip_address, port, file_name=None, current_directory=None):
 
     else:
         # No file specified: show default upload commands
-        print(colored("\nUse the following commands to send and download files:\n", 'cyan', attrs=['bold']))
+        print(colored(f"\nUse the following commands to send files from the Victim to http://{ip_address}:{port}/upload:\n", 'cyan', attrs=['bold']))
         
         # Common Commands
         print(colored("### Common Commands:", 'yellow', attrs=['bold']))
