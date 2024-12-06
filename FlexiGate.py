@@ -23,8 +23,8 @@ def print_logo():
 /_____/   U
 """
     print(Fore.YELLOW + Style.BRIGHT + logo)
-    print(Fore.CYAN + Style.BRIGHT + "FlexiGate 1.1 by q3alique")
-    print(Fore.CYAN + "Release Date: November 10, 2024")
+    print(Fore.CYAN + Style.BRIGHT + "FlexiGate 1.2 by q3alique")
+    print(Fore.CYAN + "Release Date: December 6, 2024")
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -397,3 +397,4 @@ if __name__ == '__main__':
     print(colored("Type 'help' for a list of commands or 'exit' to quit the CLI.\n", 'green'))
 
     cli_thread(upload_folder, ip_address, args.port, all_interfaces)
+
