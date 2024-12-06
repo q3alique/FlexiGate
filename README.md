@@ -67,7 +67,8 @@ FlexiGate is ideal for lightweight file sharing, especially during pentesting as
      - **cd**: Change directories.
      - **cd ..**: Navigate up one directory level.
      - **show**: Display upload, download, and file listing commands.
-     - **show file**: Display download commands for a specific file. 
+     - **show <Existing-file>**: Display download commands for a specific file.
+     - **show <Non-Existing-file>**: Display upload commands for a specific file.
      - **interfaces**: Display the current listening interfaces of the server.
      - **interface <interface>**: Allow interface selection.
      - **exit**: Quit the CLI.
